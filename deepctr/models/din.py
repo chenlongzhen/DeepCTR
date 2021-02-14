@@ -40,6 +40,7 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     """
 
     features = build_input_features(dnn_feature_columns)
+    # list: [ SparseFeat(name='user', vocabulary_size=3, embedding_dim=10, use_hash=False, dtype='int32', embeddings_initializer=<tensorflow.python.ops.init_ops.RandomNormal object at 0x10973b400>, embedding_name='user', group_name='default_group', trainable=True)
 
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
@@ -50,11 +51,11 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
 
     history_feature_columns = []
     sparse_varlen_feature_columns = []
-    history_fc_names = list(map(lambda x: "hist_" + x, history_feature_list))
+    history_fc_names = list(map(lambda x: "hist_" + x, history_feature_list))# seq sparse 特征
     for fc in varlen_sparse_feature_columns:
         feature_name = fc.name
         if feature_name in history_fc_names:
-            history_feature_columns.append(fc)
+            history_feature_columns.append(fc)# seq sparse 特征
         else:
             sparse_varlen_feature_columns.append(fc)
 
@@ -63,9 +64,9 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="")
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,
-                                      history_feature_list, to_list=True)
+                                      history_feature_list, to_list=True)# 用作query的sparse embedding
     keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names,
-                                     history_fc_names, to_list=True)
+                                     history_fc_names, to_list=True) # 用作被查询算相似度的seq emb
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
                                           mask_feat_list=history_feature_list, to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)

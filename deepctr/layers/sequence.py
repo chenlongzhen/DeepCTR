@@ -250,10 +250,11 @@ class AttentionSequencePoolingLayer(Layer):
                 raise ValueError(
                     "When supports_masking=True,input must support masking")
             queries, keys = inputs
-            key_masks = tf.expand_dims(mask[-1], axis=1)
+            key_masks = tf.expand_dims(mask[-1], axis=1)# 使用v的mask
+            # [<tf.Tensor 'concatenate_3/All:0' shape=(?, 1) dtype=bool>, <tf.Tensor 'concatenate/All:0' shape=(?, 4) dtype=bool>]
+            # Tensor("attention_sequence_pooling_layer/ExpandDims:0", shape=(?, 1, 4), dtype=bool)
 
         else:
-
             queries, keys, keys_length = inputs
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
@@ -267,7 +268,7 @@ class AttentionSequencePoolingLayer(Layer):
         else:
             paddings = tf.zeros_like(outputs)
 
-        outputs = tf.where(key_masks, outputs, paddings)
+        outputs = tf.where(key_masks, outputs, paddings)# 对分数进行mask操作！
 
         if self.weight_normalization:
             outputs = softmax(outputs)

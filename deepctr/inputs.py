@@ -36,10 +36,9 @@ def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns,
             # if feat.name not in sparse_embedding:
             emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
                             embeddings_initializer=feat.embeddings_initializer,
-                            embeddings_regularizer=l2(
-                                l2_reg),
-                            name=prefix + '_seq_emb_' + feat.name,
-                            mask_zero=seq_mask_zero)
+                            embeddings_regularizer=l2(l2_reg),
+                            name=prefix + '_seq_emb_' + feat.name, # 与30行的diff
+                            mask_zero=seq_mask_zero) # 与30行的diff
             emb.trainable = feat.trainable
             sparse_embedding[feat.embedding_name] = emb
     return sparse_embedding
@@ -81,7 +80,7 @@ def embedding_lookup(sparse_embedding_dict, sparse_input_dict, sparse_feature_co
         if (len(return_feat_list) == 0 or feature_name in return_feat_list):
             if fc.use_hash:
                 lookup_idx = Hash(fc.vocabulary_size, mask_zero=(feature_name in mask_feat_list))(
-                    sparse_input_dict[feature_name])
+                    sparse_input_dict[feature_name]) # mask_zero将0  if mask_zero = True,0 or 0.0 will be set to 0,other value will be set in range[1,num_buckets)
             else:
                 lookup_idx = sparse_input_dict[feature_name]
 
